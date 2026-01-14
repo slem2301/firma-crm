@@ -1,0 +1,305 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String @id @default(cuid())
+  email        String @unique
+  name         String?
+  passwordHash String
+
+  dealerId String? 
+  dealer   Dealer? @relation(fields: [dealerId], references: [id])
+  isActive Boolean @default(true)
+
+  roles     UserRole[]
+  createdAt DateTime   @default(now())
+}
+
+model Role {
+  id    String     @id @default(cuid())
+  name  String     @unique
+  users UserRole[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
+}
+
+model Order {
+  id String @id @default(cuid())
+
+  orderNumber String
+  project     String
+
+  phones    String? // <= ВАЖНО: строка, не массив
+  date      DateTime? // дата заказа
+  routeDate DateTime? // если нужен withRouteDate
+
+  total          Int
+  kickback       Int @default(0) // то, что ты называл "otkat"
+  dealerKickback Int @default(0)
+
+  // фильтры (справочники)
+  countryId String?
+  country   Country? @relation(fields: [countryId], references: [id])
+
+  typeId String?
+  type   OrderType? @relation(fields: [typeId], references: [id])
+
+  dealerId String?
+  dealer   Dealer? @relation(fields: [dealerId], references: [id])
+
+  statusId String?
+  status   OrderStatus? @relation(fields: [statusId], references: [id])
+
+  productTypeId String?
+  productType   ProductType? @relation(fields: [productTypeId], references: [id])
+
+  currencyId String?
+  currency   Currency? @relation(fields: [currencyId], references: [id])
+
+  // товары заказа
+  products OrderProduct[]
+
+  createdAt DateTime @default(now())
+
+  @@index([orderNumber])
+  @@index([date])
+  @@index([routeDate])
+}
+
+model OrderProduct {
+  id String @id @default(cuid())
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  name  String
+  qty   Int    @default(1)
+  price Int    @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+}
+
+// ---- справочники ----
+
+model Currency {
+  id     String  @id @default(cuid())
+  code   String  @unique
+  symbol String
+  orders Order[]
+}
+
+model OrderType {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  orders Order[]
+}
+
+model Dealer {
+  id     String  @id @default(cuid())
+  name   String  @unique
+
+  // контакты
+  email  String?
+  phone  String?
+  notes  String?
+
+  // статус
+  isActive Boolean @default(true)
+
+  // условия
+  defaultDealerKickback Int @default(0)
+
+  // связи
+  orders Order[]
+  users  User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+
+model OrderStatus {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  orders Order[]
+}
+
+model Country {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  orders   Order[]
+  projects Project[] // <-- ДОБАВЬ
+
+  leads    Lead[]
+  adSpends AdSpend[]
+}
+
+model ProductType {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  orders   Order[]
+  projects Project[] // <-- ДОБАВЬ
+
+  leads    Lead[]
+  adSpends AdSpend[]
+}
+
+model Project {
+  id     String  @id @default(cuid())
+  name   String
+  domain String?
+  url    String?
+
+  isTesting      Boolean @default(false)
+  autoPhoneMode  Boolean @default(false)
+  randomRedirect Boolean @default(false)
+
+  countryId String?
+  country   Country? @relation(fields: [countryId], references: [id])
+
+  productTypeId String?
+  productType   ProductType? @relation(fields: [productTypeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  leads Lead[]
+
+  @@index([countryId])
+  @@index([productTypeId])
+}
+
+enum LeadSource {
+  YANDEX
+  GOOGLE
+  OTHER
+}
+
+enum SpendSource {
+  YANDEX
+  GOOGLE
+  OTHER
+  TOTAL
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  source LeadSource
+
+  // можно связать с проектом
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+
+  // для фильтров (можно и не хранить, если всё берётся из project)
+  countryId     String?
+  country       Country?     @relation(fields: [countryId], references: [id])
+  productTypeId String?
+  productType   ProductType? @relation(fields: [productTypeId], references: [id])
+
+  @@index([createdAt])
+  @@index([source])
+  @@index([countryId])
+  @@index([productTypeId])
+  @@index([projectId])
+}
+
+model AdSpend {
+  id     String      @id @default(cuid())
+  date   DateTime // день (00:00)
+  source SpendSource
+
+  amount   Int @default(0) // в центах/долларах как у тебя (Int)
+  supposed Int @default(0)
+
+  countryId String?
+  country   Country? @relation(fields: [countryId], references: [id])
+
+  productTypeId String?
+  productType   ProductType? @relation(fields: [productTypeId], references: [id])
+
+  @@unique([date, source, countryId, productTypeId])
+  @@index([date])
+  @@index([source])
+}
+
+
+model PriceVersion {
+  id        String   @id @default(cuid())
+  version   Int      @unique
+  name      String
+  date      DateTime
+  isActive  Boolean  @default(true)
+
+  rows      PriceRow[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([date])
+  @@index([isActive])
+}
+
+model PriceRow {
+  id            String @id @default(cuid())
+
+  versionId     String
+  version       PriceVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  product_id    String
+  name          String
+
+  rb_buy        Int @default(0)
+  price_rb      Int @default(0)
+  otkat_rb      Int @default(0)
+  otkat_rb_d    Int @default(0)
+
+  delivery_c_br      Int @default(0)
+  delivery_c_usd     Int @default(0)
+  delivery_r_br      Int @default(0)
+  delivery_r_usd     Int @default(0)
+  price_delivery_br  Int @default(0)
+
+  ru_buy        Int @default(0)
+  price_ru      Int @default(0)
+  otkat_ru      Int @default(0)
+  otkat_ru_d    Int @default(0)
+
+  delivery_ru_ru     Int @default(0)
+  delivery_ru_usd    Int @default(0)
+  price_delivery_ru  Int @default(0)
+
+  koef          Int @default(0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([versionId])
+  @@index([product_id])
+  @@index([name])
+}
+

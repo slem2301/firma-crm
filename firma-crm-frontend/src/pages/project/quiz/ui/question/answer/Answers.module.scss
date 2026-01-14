@@ -1,0 +1,13 @@
+.withTextAnswers {
+    &>* {
+        width: calc((100% - 20px) / 2);
+        height: 40px;
+    }
+}
+
+.withImageAnswers {
+    &>* {
+        width: calc((100% - (20px * 3)) / 4);
+        height: 340px;
+    }
+}

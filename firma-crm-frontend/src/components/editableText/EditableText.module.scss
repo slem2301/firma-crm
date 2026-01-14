@@ -1,0 +1,20 @@
+.wrapper {
+    & button[aria-label="edit"] {
+        transition: all 0.2s ease;
+
+        @media (min-width: 575px) {
+            opacity: 0;
+            min-width: 0;
+            width: 0;
+        }
+    }
+
+    &:hover {
+        & button[aria-label="edit"] {
+            opacity: 1;
+            min-width: var(--chakra-sizes-6);
+            width: auto;
+            margin-right: 3px;
+        }
+    }
+}

@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:16
+    container_name: firma_crm_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: crm
+      POSTGRES_PASSWORD: crm
+      POSTGRES_DB: crm
+    ports:
+      - "5432:5432"
+    volumes:
+      - firma_crm_db:/var/lib/postgresql/data
+
+  backend:
+    env_file:
+      - ./firma-crm-backend/.env
+    build:
+      context: ./firma-crm-backend
+      dockerfile: Dockerfile.dev
+    container_name: firma_crm_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://crm:crm@db:5432/crm?schema=public
+      PORT: 4000
+      NODE_ENV: development
+      PRISMA_CLIENT_ENGINE_TYPE: library
+    ports:
+      - "4000:4000"
+      - "5555:5555"
+    depends_on:
+      - db
+    volumes:
+      - ./:/workspace # ✅ весь репозиторий целиком
+      - ./firma-crm-backend:/app
+      - /app/node_modules
+    command: sh -lc "npx prisma generate && npm run start:docker"
+
+  frontend:
+    build:
+      context: ./firma-crm-frontend
+      dockerfile: Dockerfile.dev
+    container_name: firma_crm_frontend
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: http://localhost:4000
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./firma-crm-frontend:/app
+      - /app/node_modules
+
+volumes:
+  firma_crm_db:

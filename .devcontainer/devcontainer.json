@@ -1,0 +1,21 @@
+{
+    "name": "firma-crm",
+    "dockerComposeFile": [
+        "../docker-compose.yml"
+    ],
+    "service": "backend",
+    "workspaceFolder": "/workspace",
+    "shutdownAction": "none",
+    "overrideCommand": false,
+    "postCreateCommand": "cd firma-crm-backend && npm install",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "Prisma.prisma",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    }
+}

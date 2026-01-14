@@ -1,0 +1,10 @@
+.link {
+    &[aria-current] {
+        div {
+           color: var(--chakra-colors-blue-300);
+            &:hover {
+                color: white;
+            }
+        }
+    }
+}
