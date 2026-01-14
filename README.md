@@ -36,7 +36,7 @@ Infrastructure:
 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/firma-crm.git
+git clone https://github.com/slem2301/firma-crm.git
 cd firma-crm
 ```
 
