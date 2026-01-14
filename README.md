@@ -55,8 +55,9 @@ docker compose up --build
 
 4. Migrate and seed data base
 ```bash
+cd firma-crm-backend
 docker compose exec backend npx prisma migrate dev
-docker compose exec backend npx prisma db seed
+docker compose exec backend node prisma/seed.js
 ```
 
 5. If you want to look Data base

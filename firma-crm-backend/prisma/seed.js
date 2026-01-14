@@ -97,27 +97,27 @@ async function main() {
 
     // ===== ORDER STATUSES =====
     const statusNew = await prisma.orderStatus.upsert({
-        where: { name: "NEW" },
+        where: { name: "ORDER" },
         update: {},
-        create: { name: "NEW" },
+        create: { name: "ORDER" },
     });
 
     const statusInProgress = await prisma.orderStatus.upsert({
-        where: { name: "IN_PROGRESS" },
+        where: { name: "PREORDER" },
         update: {},
         create: { name: "IN_PROGRESS" },
     });
 
     const statusDone = await prisma.orderStatus.upsert({
-        where: { name: "DONE" },
+        where: { name: "REPEAT" },
         update: {},
-        create: { name: "DONE" },
+        create: { name: "REPEAT" },
     });
 
     const statusCanceled = await prisma.orderStatus.upsert({
-        where: { name: "CANCELED" },
+        where: { name: "DONE" },
         update: {},
-        create: { name: "CANCELED" },
+        create: { name: "DONE" },
     });
 
 
