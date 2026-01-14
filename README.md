@@ -33,20 +33,21 @@ Infrastructure:
 
 ## Project Structure
 
+```text
 firma-crm/
 ├─ firma-crm-frontend/
 │  ├─ src/
+│  ├─ public/
 │  ├─ .env.example
 │  ├─ Dockerfile.dev
 │  └─ package.json
-│
 ├─ firma-crm-backend/
 │  ├─ src/
 │  ├─ prisma/
+│  ├─ test/
 │  ├─ .env.example
 │  ├─ Dockerfile.dev
 │  └─ package.json
-│
 ├─ docker-compose.yml
 └─ README.md
 
