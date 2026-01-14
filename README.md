@@ -50,7 +50,7 @@ firma-crm/
 │  └─ package.json
 ├─ docker-compose.yml
 └─ README.md
-
+```
 ---
 
 ## Features
