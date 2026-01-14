@@ -53,6 +53,18 @@ cp firma-crm-frontend/.env.example firma-crm-frontend/.env
 docker compose up --build
 ```
 
+4. Migrate and seed data base
+```bash
+docker compose exec backend npx prisma migrate dev
+docker compose exec backend npx prisma db seed
+```
+
+5. If you want to look Data base
+```bash
+docker compose exec backend npx prisma studio --port 5555 --browser none
+```
+And open localhost:5555
+
 ---
 
 ## Project Structure

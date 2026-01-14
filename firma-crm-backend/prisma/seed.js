@@ -31,8 +31,8 @@ async function main() {
     });
 
     // ===== ADMIN USER =====
-    const adminEmail = "admin@crm.local";
-    const adminPassword = "admin1234"; // можешь поменять
+    const adminEmail = "admin@test.com";
+    const adminPassword = "NewPass123!"; // можешь поменять
     const adminPasswordHash = await bcrypt.hash(adminPassword, 10);
 
     const adminUser = await prisma.user.upsert({
@@ -94,17 +94,46 @@ async function main() {
         skipDuplicates: true,
     });
 
+
+    // ===== ORDER STATUSES =====
+    const statusNew = await prisma.orderStatus.upsert({
+        where: { name: "NEW" },
+        update: {},
+        create: { name: "NEW" },
+    });
+
+    const statusInProgress = await prisma.orderStatus.upsert({
+        where: { name: "IN_PROGRESS" },
+        update: {},
+        create: { name: "IN_PROGRESS" },
+    });
+
+    const statusDone = await prisma.orderStatus.upsert({
+        where: { name: "DONE" },
+        update: {},
+        create: { name: "DONE" },
+    });
+
+    const statusCanceled = await prisma.orderStatus.upsert({
+        where: { name: "CANCELED" },
+        update: {},
+        create: { name: "CANCELED" },
+    });
+
+
     // ===== ORDERS (optional) =====
-    // Проставим dealerId части заказов, если хочешь проверить фильтрацию/связи
+    const statuses = [statusNew, statusInProgress, statusDone, statusCanceled];
+
     await prisma.order.createMany({
         data: Array.from({ length: 15 }).map((_, i) => ({
             orderNumber: `ORD-${1000 + i}`,
             project: ["Kitchen", "Bathroom", "Windows"][i % 3],
             total: 100 + i * 20,
             dealerKickback: i % 4 === 0 ? 0 : 10,
-            dealerId: i % 2 === 0 ? dealer.id : null, // половина с дилером
+            dealerId: i % 2 === 0 ? dealer.id : null,
+
+            statusId: statuses[i % statuses.length].id, // ✅ ВОТ ОНО
         })),
-        skipDuplicates: true, // если у тебя orderNumber уникальный, иначе можно убрать
     });
 
     // ===== PRICE VERSION + ROWS =====
