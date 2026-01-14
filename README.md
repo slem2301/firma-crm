@@ -91,13 +91,17 @@ REACT_APP_API_URL=http://localhost:4000
 
 1. Clone the repository
 
+```bash
 git clone https://github.com/YOUR_USERNAME/firma-crm.git
 cd firma-crm
+```
 
 2. Create environment files
 
+```bash
 cp firma-crm-backend/.env.example firma-crm-backend/.env
 cp firma-crm-frontend/.env.example firma-crm-frontend/.env
+```
 
 3. Run the application
 
